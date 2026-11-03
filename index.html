@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Ledger Brothers Cloud: sign in</title>
+<meta name="description" content="Sign in to your Ledger Brothers Cloud inventory ledgers. Sync across your devices and your team.">
+<meta name="robots" content="noindex">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self' https://*.supabase.co wss://*.supabase.co; frame-src 'self' about:; base-uri 'none'; form-action 'none'; object-src 'none'">
+<meta name="referrer" content="strict-origin-when-cross-origin">
+<style>
+:root{--navy:#0b2a4a;--teal:#0e6b66;--bg:#f6f8f9;--line:#d7dfe3;--bad:#b0472f}
+*{box-sizing:border-box}body{margin:0;font:16px/1.5 system-ui,-apple-system,Segoe UI,sans-serif;color:var(--navy);background:var(--bg)}
+.wrap{max-width:420px;margin:0 auto;padding:32px 20px}
+h1{font-size:1.5rem;margin:0 0 4px}p.sub{margin:0 0 20px;color:#4a5b68}
+.card{background:#fff;border:1px solid var(--line);border-radius:14px;padding:22px}
+label{display:block;font-weight:600;margin:14px 0 4px}
+input{width:100%;padding:12px;border:1px solid var(--line);border-radius:10px;font:inherit}
+button{font:inherit;cursor:pointer;border:0;border-radius:10px;padding:12px 16px;background:var(--teal);color:#fff;font-weight:700;width:100%;margin-top:18px}
+button.link{background:none;color:var(--teal);width:auto;margin:10px 12px 0 0;padding:4px;font-weight:600;text-decoration:underline}
+button.ghost{background:#fff;color:var(--navy);border:1px solid var(--line)}
+#msg{margin-top:14px;min-height:1.4em;font-size:.95rem}#msg.bad{color:var(--bad)}#msg.ok{color:var(--teal)}
+[hidden]{display:none!important}
+.list a,.list button{display:block;text-align:left;margin:8px 0 0}
+#bar{display:flex;gap:10px;align-items:center;padding:8px 12px;background:var(--navy);color:#fff;font-size:.9rem}
+#bar span{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#bar button{width:auto;margin:0;padding:6px 12px;background:#ffffff22}
+#frame{width:100%;height:calc(100vh - 44px);border:0;background:#fff}
+</style>
+</head>
+<body>
+<main id="auth" class="wrap">
+  <h1>Ledger Brothers Cloud</h1>
+  <p class="sub">Your ledgers, synced across your devices.</p>
+  <div class="card">
+    <form id="form" novalidate>
+      <label for="email">Email</label>
+      <input id="email" type="email" autocomplete="email" required>
+      <div id="pwrow"><label for="pw">Password</label>
+      <input id="pw" type="password" autocomplete="current-password" minlength="10" required></div>
+      <button id="go" type="submit">Sign in</button>
+    </form>
+    <button class="link" id="toggle" type="button">Create an account</button>
+    <button class="link" id="forgot" type="button">Forgot password?</button>
+    <div id="msg" role="status" aria-live="polite"></div>
+  </div>
+  <p class="sub" style="margin-top:16px;font-size:.85rem">Cloud is a paid add-on to Ledger Brothers. Your data is stored with Supabase and is only visible to your account.</p>
+</main>
+
+<main id="home" class="wrap" hidden>
+  <h1>Your ledgers</h1>
+  <p class="sub" id="who"></p>
+  <div class="card list" id="list"></div>
+  <div class="card" id="locked" hidden>
+    <strong>Cloud isn't active on this account yet.</strong>
+    <p>After you buy, email <a id="sup" href="#"></a> from this address with your Gumroad receipt and we'll switch it on.</p>
+    <a id="buy" target="_blank" rel="noopener"><button type="button">Get Ledger Brothers</button></a>
+  </div>
+  <button class="ghost" id="out1" type="button">Sign out</button>
+</main>
+
+<section id="run" hidden>
+  <div id="bar"><span id="title"></span><button id="back" type="button">All ledgers</button><button id="out2" type="button">Sign out</button></div>
+  <iframe id="frame" title="Ledger" allow="clipboard-write"></iframe>
+</section>
+
+<script src="supabase.min.js"></script>
+<script src="adapter.js"></script>
+<script src="config.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
