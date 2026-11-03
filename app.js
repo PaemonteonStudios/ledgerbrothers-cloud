@@ -66,9 +66,16 @@
     $("#frame").src = "about:blank"; show("#home");
   };
 
+  var signedInLogged = null;
   async function home() {
     show("#home");
     $("#who").textContent = session.user.email;
+    try { await sb.rpc("claim_pending_access"); } catch (e) { /* no pending purchase */ }
+    if (signedInLogged !== session.user.id) {
+      signedInLogged = session.user.id;
+      sb.from("events").insert({ kind: "signin" }).then(function () {}, function () {});
+    }
+    sb.rpc("is_admin").then(function (r) { $("#adminlink").hidden = r.data !== true; }, function () {});
     var r = await sb.from("entitlements").select("edition,active,expires_at").maybeSingle();
     ent = r.data && r.data.active && (!r.data.expires_at || new Date(r.data.expires_at) > new Date()) ? r.data : null;
     var list = $("#list"); list.textContent = "";
@@ -95,6 +102,7 @@
     // Same-origin srcdoc frame: hand the ledger its cloud database before its own script runs.
     var hook = "<script>window.claude=window.parent.__lbClaude;<\/script>";
     html = html.replace(/<head[^>]*>/i, function (m) { return m + hook; });
+    sb.from("events").insert({ kind: "open_ledger", ledger: slug }).then(function () {}, function () {});
     $("#title").textContent = name + " (cloud)";
     show("#run");
     $("#frame").srcdoc = html;

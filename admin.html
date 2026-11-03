@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Ledger Brothers Cloud: admin</title>
+<meta name="robots" content="noindex,nofollow">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self' https://*.supabase.co wss://*.supabase.co; base-uri 'none'; form-action 'none'; object-src 'none'; frame-ancestors 'none'">
+<style>
+:root{--navy:#0b2a4a;--teal:#0e6b66;--bg:#f6f8f9;--line:#d7dfe3;--bad:#b0472f;--mute:#4a5b68}
+*{box-sizing:border-box}body{margin:0;font:15px/1.5 system-ui,-apple-system,Segoe UI,sans-serif;color:var(--navy);background:var(--bg)}
+.wrap{max-width:1100px;margin:0 auto;padding:20px 16px 60px}
+h1{font-size:1.4rem;margin:0}h2{font-size:1.05rem;margin:28px 0 10px}
+header{display:flex;gap:12px;align-items:center;justify-content:space-between;flex-wrap:wrap}
+a.btn,button{font:inherit;cursor:pointer;border:1px solid var(--line);border-radius:9px;padding:7px 12px;background:#fff;color:var(--navy);text-decoration:none}
+button.go{background:var(--teal);color:#fff;border-color:var(--teal)}button.bad{color:var(--bad)}
+.tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}
+.tile{background:#fff;border:1px solid var(--line);border-radius:12px;padding:12px 14px}
+.tile b{display:block;font-size:1.6rem}.tile span{color:var(--mute);font-size:.85rem}
+.card{background:#fff;border:1px solid var(--line);border-radius:12px;padding:14px;overflow:auto}
+table{border-collapse:collapse;width:100%;font-size:.9rem}th,td{text-align:left;padding:7px 8px;border-bottom:1px solid var(--line);white-space:nowrap}
+th{color:var(--mute);font-weight:600}
+.pill{padding:2px 8px;border-radius:99px;font-size:.78rem;border:1px solid var(--line)}
+.on{background:#e3f3ef;border-color:#9fd3c8}.off{background:#f6e6e1;border-color:#e2b3a6}
+#bars{display:flex;align-items:flex-end;gap:3px;height:90px}
+#bars div{flex:1;background:var(--teal);min-height:2px;border-radius:2px 2px 0 0}
+#msg{margin:12px 0;min-height:1.3em}.bad-t{color:var(--bad)}
+[hidden]{display:none!important}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header><h1>Admin</h1><div><span id="me"></span> <a class="btn" href="./">Back to ledgers</a> <button id="refresh" type="button">Refresh</button></div></header>
+  <div id="msg" role="status"></div>
+  <div id="denied" hidden class="card">This page is for Ledger Brothers admins only. <a href="./">Go back</a>.</div>
+  <div id="main" hidden>
+    <div class="tiles" id="tiles"></div>
+    <h2>New accounts, last 30 days</h2>
+    <div class="card"><div id="bars" aria-label="Signups by day"></div></div>
+    <h2>By ledger</h2>
+    <div class="card"><table id="byLedger"><thead><tr><th>Ledger</th><th>Accounts</th><th>Items</th></tr></thead><tbody></tbody></table></div>
+    <h2>Accounts</h2>
+    <div class="card"><table id="users"><thead><tr><th>Email</th><th>Joined</th><th>Last sign-in</th><th>Confirmed</th><th>Access</th><th>Source</th><th>Rows</th><th>Opens 30d</th><th>Actions</th></tr></thead><tbody></tbody></table></div>
+  </div>
+</div>
+<script src="supabase.min.js"></script>
+<script src="config.js"></script>
+<script src="admin.js"></script>
+</body>
+</html>
