@@ -8,6 +8,9 @@
 <meta name="robots" content="noindex">
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self' https://*.supabase.co wss://*.supabase.co; frame-src 'self' about:; base-uri 'none'; form-action 'none'; object-src 'none'">
 <meta name="referrer" content="strict-origin-when-cross-origin">
+<link rel="icon" type="image/png" sizes="32x32" href="icon-32.png">
+<link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-180.png">
 <style>
 :root{--navy:#0b2a4a;--teal:#0e6b66;--bg:#f6f8f9;--line:#d7dfe3;--bad:#b0472f}
 *{box-sizing:border-box}body{margin:0;font:16px/1.5 system-ui,-apple-system,Segoe UI,sans-serif;color:var(--navy);background:var(--bg)}
@@ -19,6 +22,8 @@ input{width:100%;padding:12px;border:1px solid var(--line);border-radius:10px;fo
 button{font:inherit;cursor:pointer;border:0;border-radius:10px;padding:12px 16px;background:var(--teal);color:#fff;font-weight:700;width:100%;margin-top:18px}
 button.link{background:none;color:var(--teal);width:auto;margin:10px 12px 0 0;padding:4px;font-weight:600;text-decoration:underline}
 button.ghost{background:#fff;color:var(--navy);border:1px solid var(--line)}
+.small{font-size:.85rem;margin-top:16px}.foot{text-align:center}a{color:var(--teal)}
+#notice{position:fixed;left:12px;right:12px;bottom:12px;max-width:560px;margin:0 auto;background:var(--navy);color:#fff;border-radius:12px;padding:12px 14px;display:flex;gap:12px;align-items:center;font-size:.9rem;z-index:5}#notice a{color:#bfeee8}#notice button{width:auto;margin:0;padding:8px 14px;background:#fff;color:var(--navy)}
 #msg{margin-top:14px;min-height:1.4em;font-size:.95rem}#msg.bad{color:var(--bad)}#msg.ok{color:var(--teal)}
 [hidden]{display:none!important}
 .list a,.list button{display:block;text-align:left;margin:8px 0 0}
@@ -34,9 +39,9 @@ button.ghost{background:#fff;color:var(--navy);border:1px solid var(--line)}
   <p class="sub">Your ledgers, synced across your devices.</p>
   <div class="card">
     <form id="form" novalidate>
-      <label for="email">Email</label>
-      <input id="email" type="email" autocomplete="email" required>
-      <div id="pwrow"><label for="pw">Password</label>
+      <div id="emailrow"><label for="email">Email</label>
+      <input id="email" type="email" autocomplete="email" required></div>
+      <div id="pwrow"><label for="pw" id="pwlabel">Password</label>
       <input id="pw" type="password" autocomplete="current-password" minlength="10" required></div>
       <button id="go" type="submit">Sign in</button>
     </form>
@@ -44,7 +49,7 @@ button.ghost{background:#fff;color:var(--navy);border:1px solid var(--line)}
     <button class="link" id="forgot" type="button">Forgot password?</button>
     <div id="msg" role="status" aria-live="polite"></div>
   </div>
-  <p class="sub" style="margin-top:16px;font-size:.85rem">Cloud is a paid add-on to Ledger Brothers. Your data is stored with Supabase and is only visible to your account.</p>
+  <p class="sub small" id="agree">By creating an account or signing in you agree to the <a href="terms.html">Terms</a> and <a href="privacy.html">Privacy Policy</a>.</p>
 </main>
 
 <main id="home" class="wrap" hidden>
@@ -58,7 +63,9 @@ button.ghost{background:#fff;color:var(--navy);border:1px solid var(--line)}
   </div>
   <a id="adminlink" href="admin.html" hidden><button class="ghost" type="button">Admin dashboard</button></a>
   <button class="ghost" id="out1" type="button">Sign out</button>
+  <p class="sub small foot"><a href="terms.html">Terms</a> · <a href="privacy.html">Privacy</a> · <a id="sup2" href="#">Support</a></p>
 </main>
+<div id="notice" role="region" aria-label="Storage notice" hidden><span>This site uses your browser's storage only to keep you signed in. No ads or tracking. <a href="privacy.html">Details</a></span><button id="noticeok" type="button">OK</button></div>
 
 <section id="run" hidden>
   <div id="bar"><span id="title"></span><button id="back" type="button">All ledgers</button><button id="out2" type="button">Sign out</button></div>
@@ -69,5 +76,6 @@ button.ghost{background:#fff;color:var(--navy);border:1px solid var(--line)}
 <script src="adapter.js"></script>
 <script src="config.js"></script>
 <script src="app.js"></script>
+<script src="notice.js"></script>
 </body>
 </html>

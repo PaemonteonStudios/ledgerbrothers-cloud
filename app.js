@@ -9,15 +9,17 @@
   var sb = window.supabase.createClient(C.SUPABASE_URL, C.SUPABASE_ANON_KEY, {
     auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true, flowType: "pkce" }
   });
-  var mode = "in", session = null, adapter = null, ent = null;
+  var mode = "in", session = null, adapter = null, ent = null, recovering = false;
 
   function say(t, cls) { var m = $("#msg"); m.textContent = t || ""; m.className = cls || ""; }
   function show(id) { ["#auth", "#home", "#run"].forEach(function (s) { $(s).hidden = s !== id; }); }
   function setMode(m) {
     mode = m;
-    $("#go").textContent = m === "in" ? "Sign in" : m === "up" ? "Create account" : "Send reset link";
+    $("#go").textContent = m === "in" ? "Sign in" : m === "up" ? "Create account" : m === "newpw" ? "Save new password" : "Send reset link";
+    $("#emailrow").hidden = m === "newpw";
     $("#toggle").textContent = m === "up" ? "I have an account" : "Create an account";
     $("#pwrow").hidden = m === "reset";
+    $("#pwlabel").textContent = m === "newpw" ? "New password (10+ characters)" : "Password";
     $("#pw").autocomplete = m === "up" ? "new-password" : "current-password";
     say("");
   }
@@ -35,6 +37,14 @@
   $("#form").onsubmit = async function (ev) {
     ev.preventDefault();
     var email = $("#email").value.trim(), pw = $("#pw").value;
+    if (mode === "newpw") {
+      if (pw.length < 10) return say("Use at least 10 characters.", "bad");
+      $("#go").disabled = true;
+      var u = await sb.auth.updateUser({ password: pw });
+      $("#go").disabled = false;
+      if (u.error) return say(friendly(u.error), "bad");
+      recovering = false; $("#pw").value = ""; setMode("in"); home(); return;
+    }
     if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) return say("Enter a valid email.", "bad");
     $("#go").disabled = true;
     try {
@@ -80,7 +90,7 @@
     ent = r.data && r.data.active && (!r.data.expires_at || new Date(r.data.expires_at) > new Date()) ? r.data : null;
     var list = $("#list"); list.textContent = "";
     $("#locked").hidden = !!ent; list.hidden = !ent;
-    $("#sup").textContent = C.SUPPORT; $("#sup").href = "mailto:" + C.SUPPORT;
+    $("#sup").textContent = C.SUPPORT; $("#sup").href = "mailto:" + C.SUPPORT; $("#sup2").href = "mailto:" + C.SUPPORT;
     $("#buy").href = C.STORE_URL;
     if (!ent) return;
     LEDGERS.forEach(function (l) {
@@ -110,10 +120,8 @@
 
   sb.auth.onAuthStateChange(function (ev, s) {
     session = s;
-    if (ev === "PASSWORD_RECOVERY") {
-      var np = prompt("Choose a new password (10+ characters)");
-      if (np && np.length >= 10) sb.auth.updateUser({ password: np }).then(function (r) { alert(r.error ? "Could not update password." : "Password updated."); });
-    }
+    if (ev === "PASSWORD_RECOVERY") { recovering = true; show("#auth"); setMode("newpw"); return; }
+    if (recovering) return;
     if (s) setTimeout(home, 0); else { show("#auth"); setMode("in"); $("#pw").value = ""; }
   });
   sb.auth.getSession().then(function (r) { if (!r.data.session) show("#auth"); });
