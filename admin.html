@@ -34,9 +34,18 @@ nav#tabs{display:flex;gap:8px;flex-wrap:wrap;margin:14px 0 0}.mute{color:var(--m
 </head>
 <body>
 <div class="wrap">
-  <header><h1>Admin</h1><div><span id="me"></span> <a class="btn" href="./">Back to ledgers</a> <button id="refresh" type="button">Refresh</button></div></header>
+  <header><h1>Admin</h1><div><span id="me"></span> <a class="btn" href="./">Back to ledgers</a> <button id="mfaOpen" type="button" hidden>Set up two-factor</button> <button id="refresh" type="button">Refresh</button></div></header>
   <div id="msg" role="status"></div>
   <div id="denied" hidden class="card">This page is for Ledger Brothers admins only. <a href="./">Go back</a>.</div>
+  <div id="mfa" hidden class="card">
+    <h2 style="margin-top:0">Two-factor sign-in</h2>
+    <p id="mfaIntro"></p>
+    <img id="mfaQr" alt="QR code to scan with your authenticator app" width="180" height="180" hidden>
+    <p id="mfaSecret" class="mute" hidden></p>
+    <div class="bar"><input id="mfaCode" inputmode="numeric" autocomplete="one-time-code" maxlength="6" placeholder="6-digit code" aria-label="6-digit code">
+      <button id="mfaGo" type="button" class="go">Verify</button><button id="mfaCancel" type="button" hidden>Not now</button></div>
+    <div id="mfaMsg" role="status" class="mute"></div>
+  </div>
   <div id="main" hidden>
     <nav id="tabs" aria-label="Sections">
       <button type="button" data-tab="overview" class="go">Overview</button>
@@ -86,6 +95,7 @@ nav#tabs{display:flex;gap:8px;flex-wrap:wrap;margin:14px 0 0}.mute{color:var(--m
 
     <section id="t-team" hidden>
       <h2>Admins</h2>
+      <div class="card bar" id="mfaBox" hidden><span id="mfaTxt"></span><button id="mfaToggle" type="button"></button></div>
       <div class="card"><table id="adm"><thead><tr><th>Email</th><th>Role</th><th></th></tr></thead><tbody></tbody></table>
         <div class="bar" id="admAdd" hidden><input id="admEmail" type="email" placeholder="Confirmed account email" aria-label="Admin email">
           <select id="admRole" aria-label="Role"><option value="admin">admin</option><option value="owner">owner</option></select>
