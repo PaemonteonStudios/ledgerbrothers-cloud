@@ -28,6 +28,9 @@ button.ghost{background:#fff;color:var(--navy);border:1px solid var(--line)}
 #msg{margin-top:14px;min-height:1.4em;font-size:.95rem}#msg.bad{color:var(--bad)}#msg.ok{color:var(--teal)}
 [hidden]{display:none!important}
 .list a,.list button{display:block;text-align:left;margin:8px 0 0}
+.check{display:flex;gap:10px;align-items:flex-start;font-weight:400;font-size:.9rem;margin:14px 0 0}.check input{width:auto;margin-top:4px}
+button.danger{background:var(--bad)}details{margin-top:10px}summary{cursor:pointer;font-weight:600}details p{font-size:.92rem;margin:8px 0}
+#amsg{min-height:1.4em;font-size:.95rem;margin-top:10px}#amsg.bad{color:var(--bad)}#amsg.ok{color:var(--teal)}.fine{font-size:.85rem;color:#4a5b68;margin:10px 0 0}
 #bar{display:flex;gap:10px;align-items:center;padding:8px 12px;background:var(--navy);color:#fff;font-size:.9rem}
 #bar span{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 #bar button{width:auto;margin:0;padding:6px 12px;background:#ffffff22}
@@ -44,13 +47,14 @@ button.ghost{background:#fff;color:var(--navy);border:1px solid var(--line)}
       <input id="email" type="email" autocomplete="email" required></div>
       <div id="pwrow"><label for="pw" id="pwlabel">Password</label>
       <input id="pw" type="password" autocomplete="current-password" minlength="10" required></div>
+      <label class="check" id="agreerow" for="agreebox" hidden><input id="agreebox" type="checkbox"><span>I am 18 or older and I agree to the <a href="terms.html" target="_blank" rel="noopener">Terms</a> and <a href="privacy.html" target="_blank" rel="noopener">Privacy Policy</a>.</span></label>
       <button id="go" type="submit">Sign in</button>
     </form>
     <button class="link" id="toggle" type="button">Create an account</button>
     <button class="link" id="forgot" type="button">Forgot password?</button>
     <div id="msg" role="status" aria-live="polite"></div>
   </div>
-  <p class="sub small" id="agree">By creating an account or signing in you agree to the <a href="terms.html">Terms</a> and <a href="privacy.html">Privacy Policy</a>.</p>
+  <p class="sub small" id="agree">By signing in you agree to the <a href="terms.html">Terms</a> and <a href="privacy.html">Privacy Policy</a>.</p>
 </main>
 
 <main id="home" class="wrap" hidden>
@@ -61,6 +65,23 @@ button.ghost{background:#fff;color:var(--navy);border:1px solid var(--line)}
     <strong>Cloud isn't active on this account yet.</strong>
     <p>After you buy, email <a id="sup" href="#"></a> from this address with your Gumroad receipt and we'll switch it on.</p>
     <a id="buy" target="_blank" rel="noopener"><button type="button">Get Ledger Brothers</button></a>
+    <p class="fine">Cloud is a monthly subscription of $9.99 per month, billed by Gumroad. It renews every month until you cancel. You can cancel any time from your Gumroad receipt or library, and you keep access to the end of the period you paid for. 7-day refund on your first payment.</p>
+  </div>
+  <div class="card" id="acct">
+    <strong>Your account</strong>
+    <button class="ghost" id="dl" type="button">Download my data</button>
+    <details id="cancelbox"><summary>Cancel my subscription</summary>
+      <p>Cloud is billed by Gumroad, so you cancel there. Open the receipt email Gumroad sent you and click <em>Manage membership</em>, or sign in at <a href="https://gumroad.com/library" target="_blank" rel="noopener">gumroad.com/library</a>, open this membership and choose Cancel. Cancelling stops future charges and you keep access until the end of the period you paid for. <a href="https://gumroad.com/help/article/192-how-do-i-cancel-my-membership" target="_blank" rel="noopener">Gumroad's steps</a>.</p>
+      <p>Stuck? Email <a id="sup3" href="#"></a> from this address and we will help you cancel.</p>
+    </details>
+    <details id="delbox"><summary>Delete my account</summary>
+      <p>This permanently deletes your sign-in and all ledger data stored in the cloud. It cannot be undone. Download your data first if you want a copy. Deleting your account does <strong>not</strong> cancel your Gumroad subscription. Cancel it first (above).</p>
+      <label for="delemail">Type your email to confirm</label>
+      <input id="delemail" type="email" autocomplete="off">
+      <label class="check" for="delack"><input id="delack" type="checkbox"><span>I understand this is permanent and that I must cancel my Gumroad subscription separately.</span></label>
+      <button class="danger" id="delgo" type="button">Delete my account and data</button>
+    </details>
+    <div id="amsg" role="status" aria-live="polite"></div>
   </div>
   <a id="adminlink" href="admin.html" hidden><button class="ghost" type="button">Admin dashboard</button></a>
   <button class="ghost" id="out1" type="button">Sign out</button>
