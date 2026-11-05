@@ -2,7 +2,7 @@
   "use strict";
   var C = window.LB_CONFIG, $ = function (s) { return document.querySelector(s); };
   var sb = window.supabase.createClient(C.SUPABASE_URL, C.SUPABASE_ANON_KEY, { auth: { persistSession: true, autoRefreshToken: true } });
-  var role = null, users = [], timer = null, tab = "overview";
+  var role = null, users = [], timer = null, tab = "overview", meEmail = "";
 
   function el(tag, text, cls) { var e = document.createElement(tag); if (text != null) e.textContent = text; if (cls) e.className = cls; return e; }
   function fmt(d) { return d ? new Date(d).toLocaleString([], { dateStyle: "medium", timeStyle: "short" }) : "never"; }
@@ -160,6 +160,9 @@
   async function loadTeam() {
     var a = await sb.rpc("admin_list_admins"), tb = clear("#adm tbody");
     $("#admAdd").hidden = role !== "owner";
+    $("#mfaBox").hidden = role !== "owner";
+    $("#mfaTxt").textContent = mfaState.mfa_required ? "Two-factor is REQUIRED for all admin access." : "Two-factor is optional right now." + (mfaState.aal === "aal2" ? "" : " Set up your own first (button at the top), then you can require it.");
+    $("#mfaToggle").textContent = mfaState.mfa_required ? "Stop requiring" : "Require two-factor"; $("#mfaToggle").disabled = !mfaState.mfa_required && mfaState.aal !== "aal2";
     if (!a.error) a.data.forEach(function (x) {
       var tr = row(tb, [x.email, x.role, ""]), td = tr.lastChild;
       if (role === "owner") td.appendChild(btn("Remove", "bad", async function () {
@@ -181,11 +184,47 @@
     if (name === "overview") loadOverview(); if (name === "accounts") loadAccounts(); if (name === "recovery") loadRecovery(); if (name === "team") loadTeam();
     if (name === "health") { loadHealth(); timer = setInterval(loadHealth, 30000); }
   }
+  var mfaState = {}, mfaFactor = null;
+  function mfaSay(t) { $("#mfaMsg").textContent = t || ""; }
+  async function mfaFlow(blocking) {
+    $("#mfa").hidden = false; $("#mfaCancel").hidden = !!blocking; $("#mfaCode").value = ""; mfaSay("");
+    $("#mfaQr").hidden = true; $("#mfaSecret").hidden = true; mfaFactor = null;
+    var f = await sb.auth.mfa.listFactors();
+    var all = (f.data && f.data.all) || [], ok = ((f.data && f.data.totp) || [])[0];
+    if (ok) { mfaFactor = ok.id; $("#mfaIntro").textContent = "Enter the 6-digit code from your authenticator app."; return; }
+    for (var i = 0; i < all.length; i++) if (all[i].status === "unverified") await sb.auth.mfa.unenroll({ factorId: all[i].id });
+    var e = await sb.auth.mfa.enroll({ factorType: "totp", friendlyName: "Ledger Brothers admin " + Date.now() });
+    if (e.error) { $("#mfaIntro").textContent = "Could not start setup. Try again."; return; }
+    mfaFactor = e.data.id;
+    $("#mfaIntro").textContent = "Scan this with an authenticator app (1Password, Google Authenticator, Authy), then type the 6-digit code it shows.";
+    $("#mfaQr").src = e.data.totp.qr_code; $("#mfaQr").hidden = false;
+    $("#mfaSecret").textContent = "Can't scan? Enter this key by hand: " + e.data.totp.secret; $("#mfaSecret").hidden = false;
+  }
+  $("#mfaOpen").onclick = function () { mfaFlow(false); };
+  $("#mfaCancel").onclick = function () { $("#mfa").hidden = true; };
+  $("#mfaGo").onclick = async function () {
+    var code = $("#mfaCode").value.replace(/\s/g, "");
+    if (!/^\d{6}$/.test(code) || !mfaFactor) return mfaSay("Enter the 6-digit code.");
+    var r = await sb.auth.mfa.challengeAndVerify({ factorId: mfaFactor, code: code });
+    if (r.error) return mfaSay("That code didn't work. Check the time on your phone and try again.");
+    $("#mfa").hidden = true; start();
+  };
+  $("#mfaToggle").onclick = async function () {
+    var on = !mfaState.mfa_required;
+    if (!confirm(on ? "Require two-factor for every admin from now on? Admins who have not set it up will be asked to when they open this page." : "Stop requiring two-factor for admin access? This makes the admin area less safe.")) return;
+    var r = await sb.rpc("admin_set_require_mfa", { p_on: on });
+    if (r.error) return say("Could not change: " + r.error.message, true);
+    say(on ? "Two-factor is now required." : "Two-factor is no longer required."); start();
+  };
   async function start() {
+    var st = await sb.rpc("admin_mfa_state"); st = st.data || {}; mfaState = st;
+    $("#mfaOpen").hidden = !(st.is_admin_row && st.aal !== "aal2");
+    if (st.is_admin_row && st.mfa_required && st.aal !== "aal2") { $("#main").hidden = true; $("#denied").hidden = true; mfaFlow(true); return; }
+    $("#mfa").hidden = true;
     var w = await sb.rpc("admin_whoami");
     if (w.error) { $("#main").hidden = true; $("#denied").hidden = false; return; }
     role = w.data; $("#denied").hidden = true; $("#main").hidden = false;
-    $("#me").textContent = $("#me").textContent + " (" + role + ")";
+    $("#me").textContent = meEmail + " (" + role + ")";
     show("overview");
   }
   document.querySelectorAll("#tabs button").forEach(function (b) { b.onclick = function () { show(b.getAttribute("data-tab")); }; });
@@ -200,7 +239,7 @@
   };
   sb.auth.getSession().then(function (r) {
     if (!r.data.session) { location.replace("./"); return; }
-    $("#me").textContent = r.data.session.user.email;
+    meEmail = r.data.session.user.email; $("#me").textContent = meEmail;
     start();
   });
 })();
