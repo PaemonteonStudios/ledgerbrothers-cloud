@@ -9,6 +9,7 @@
 <link rel="icon" type="image/png" sizes="32x32" href="icon-32.png">
 <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
 <link rel="apple-touch-icon" href="icon-180.png">
+<script>if(window.top!==window.self){document.documentElement.style.display="none";try{window.top.location=window.self.location}catch(e){}}</script>
 <style>
 :root{--navy:#0b2a4a;--teal:#0e6b66;--bg:#f6f8f9;--line:#d7dfe3;--bad:#b0472f;--mute:#4a5b68}
 *{box-sizing:border-box}body{margin:0;font:15px/1.5 system-ui,-apple-system,Segoe UI,sans-serif;color:var(--navy);background:var(--bg)}
@@ -27,7 +28,7 @@ th{color:var(--mute);font-weight:600}
 .on{background:#e3f3ef;border-color:#9fd3c8}.off{background:#f6e6e1;border-color:#e2b3a6}
 #bars{display:flex;align-items:flex-end;gap:3px;height:90px}
 #bars div{flex:1;background:var(--teal);min-height:2px;border-radius:2px 2px 0 0}
-#msg{margin:12px 0;min-height:1.3em}.bad-t{color:var(--bad)}
+nav#tabs{display:flex;gap:8px;flex-wrap:wrap;margin:14px 0 0}.mute{color:var(--mute);font-weight:400;font-size:.85rem}.bar{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin:0 0 10px}input,select{font:inherit;border:1px solid var(--line);border-radius:9px;padding:7px 10px;background:#fff;color:var(--navy)}.alert{border:1px solid #e2b3a6;background:#f6e6e1;border-radius:10px;padding:8px 12px;margin:6px 0}.okay{border:1px solid #9fd3c8;background:#e3f3ef;border-radius:10px;padding:8px 12px;margin:6px 0}#msg{margin:12px 0;min-height:1.3em}.bad-t{color:var(--bad)}
 [hidden]{display:none!important}
 </style>
 </head>
@@ -37,13 +38,61 @@ th{color:var(--mute);font-weight:600}
   <div id="msg" role="status"></div>
   <div id="denied" hidden class="card">This page is for Ledger Brothers admins only. <a href="./">Go back</a>.</div>
   <div id="main" hidden>
-    <div class="tiles" id="tiles"></div>
-    <h2>New accounts, last 30 days</h2>
-    <div class="card"><div id="bars" aria-label="Signups by day"></div></div>
-    <h2>By ledger</h2>
-    <div class="card"><table id="byLedger"><thead><tr><th>Ledger</th><th>Accounts</th><th>Items</th></tr></thead><tbody></tbody></table></div>
-    <h2>Accounts</h2>
-    <div class="card"><table id="users"><thead><tr><th>Email</th><th>Joined</th><th>Last sign-in</th><th>Confirmed</th><th>Access</th><th>Source</th><th>Rows</th><th>Opens 30d</th><th>Actions</th></tr></thead><tbody></tbody></table></div>
+    <nav id="tabs" aria-label="Sections">
+      <button type="button" data-tab="overview" class="go">Overview</button>
+      <button type="button" data-tab="accounts">Accounts</button>
+      <button type="button" data-tab="health">Live health</button>
+      <button type="button" data-tab="recovery">Recovery emails</button>
+      <button type="button" data-tab="team">Admins &amp; audit</button>
+    </nav>
+
+    <section id="t-overview">
+      <h2>Revenue</h2>
+      <div class="tiles" id="revTiles"></div>
+      <h2>Funnel</h2>
+      <div class="card"><table id="funnel"><thead><tr><th>Step</th><th>Accounts</th><th>% of signups</th></tr></thead><tbody></tbody></table></div>
+      <h2>30-day projection <span class="mute">(estimate)</span></h2>
+      <div class="card" id="proj"></div>
+      <h2>New accounts, last 30 days</h2>
+      <div class="card"><div id="bars" aria-label="Signups by day"></div></div>
+      <h2>Weekly cohorts</h2>
+      <div class="card"><table id="cohorts"><thead><tr><th>Week of</th><th>Signups</th><th>Paid</th><th>Active (7d)</th></tr></thead><tbody></tbody></table></div>
+      <h2>Usage</h2>
+      <div class="tiles" id="tiles"></div>
+      <h2>By ledger</h2>
+      <div class="card"><table id="byLedger"><thead><tr><th>Ledger</th><th>Accounts</th><th>Items</th></tr></thead><tbody></tbody></table></div>
+    </section>
+
+    <section id="t-accounts" hidden>
+      <h2>Accounts</h2>
+      <div class="bar"><input id="q" type="search" placeholder="Search email" aria-label="Search email">
+        <select id="flt" aria-label="Filter"><option value="all">All</option><option value="paid">Paying</option><option value="free">Not paying</option><option value="unconf">Unconfirmed</option><option value="idle">Never opened a ledger</option></select>
+        <span id="cnt" class="mute"></span></div>
+      <div class="card"><table id="users"><thead><tr><th>Email</th><th>Joined</th><th>Last sign-in</th><th>Confirmed</th><th>Access</th><th>Source</th><th>Rows</th><th>Opens 30d</th><th>Actions</th></tr></thead><tbody></tbody></table></div>
+    </section>
+
+    <section id="t-health" hidden>
+      <h2>Live health <span class="mute" id="hts"></span></h2>
+      <div id="alerts"></div>
+      <div class="tiles" id="hTiles"></div>
+    </section>
+
+    <section id="t-recovery" hidden>
+      <h2>Lost-checkout recovery emails</h2>
+      <div class="card" id="recInfo"></div>
+      <h2>Who would get the next email</h2>
+      <div class="card"><table id="aud"><thead><tr><th>Email</th><th>Joined</th><th>Ledger opens</th><th>Next email</th></tr></thead><tbody></tbody></table></div>
+    </section>
+
+    <section id="t-team" hidden>
+      <h2>Admins</h2>
+      <div class="card"><table id="adm"><thead><tr><th>Email</th><th>Role</th><th></th></tr></thead><tbody></tbody></table>
+        <div class="bar" id="admAdd" hidden><input id="admEmail" type="email" placeholder="Confirmed account email" aria-label="Admin email">
+          <select id="admRole" aria-label="Role"><option value="admin">admin</option><option value="owner">owner</option></select>
+          <button id="admGo" type="button" class="go">Add or change</button></div></div>
+      <h2>Audit log</h2>
+      <div class="card"><table id="audit"><thead><tr><th>When</th><th>Who</th><th>Action</th><th>Target</th><th>Detail</th></tr></thead><tbody></tbody></table></div>
+    </section>
   </div>
 </div>
 <script src="supabase.min.js"></script>
