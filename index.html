@@ -63,6 +63,12 @@ button.danger{background:var(--bad)}details{margin-top:10px}summary{cursor:point
   <div class="card list" id="list"></div>
   <div class="card" id="locked" hidden>
     <strong>Cloud isn't active on this account yet.</strong>
+    <div id="trialbox">
+      <p>Try it free for 7 days. No card needed, nothing is charged, and it stops by itself when the 7 days are up. Standard edition, one free trial per person.</p>
+      <button type="button" id="trialgo">Start my 7-day free trial</button>
+      <p class="fine" id="trialmsg" role="status"></p>
+    </div>
+    <p id="trialended" hidden><strong>Your free trial has ended.</strong> Your data is still here. Subscribe below to carry on.</p>
     <p>After you buy, email <a id="sup" href="#"></a> from this address with your Gumroad receipt and we'll switch it on.</p>
     <a id="buy" target="_blank" rel="noopener"><button type="button">Get Ledger Brothers</button></a>
     <p class="fine">Cloud is a monthly subscription of $9.99 per month, billed by Gumroad. It renews every month until you cancel. You can cancel any time from your Gumroad receipt or library, and you keep access to the end of the period you paid for. 7-day refund on your first payment.</p>
