@@ -142,7 +142,15 @@
     var b = $("#trialgo"), m = $("#trialmsg"); b.disabled = true; m.textContent = "";
     try {
       var r = await sb.rpc("start_trial");
-      if (r.error) { m.textContent = /already used/i.test(r.error.message) ? "A free trial was already used for this email. You can subscribe below." : /confirm/i.test(r.error.message) ? "Please confirm your email first, then try again." : "Couldn't start the trial. Please try again or email us."; b.disabled = false; return; }
+      if (r.error) {
+        var em = r.error.message || "";
+        m.textContent = /already used/i.test(em) ? "A free trial was already used for this email. You can subscribe below."
+          : /confirm/i.test(em) ? "Please confirm your email first, then try again."
+          : /permanent/i.test(em) ? "Please use a regular email address, not a temporary one, to start a free trial. You can still subscribe below."
+          : /too many free trials/i.test(em) ? "Free trials from this network are used up for now. You can subscribe below, or email us and we'll help."
+          : "Couldn't start the trial. Please try again or email us.";
+        b.disabled = false; return;
+      }
       b.disabled = false; home();
     } catch (e) { m.textContent = "Couldn't start the trial. Please check your connection and try again."; b.disabled = false; }
   };
