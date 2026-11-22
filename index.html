@@ -6,7 +6,7 @@
 <title>Ledger Brothers Cloud: sign in</title>
 <meta name="description" content="Sign in to your Ledger Brothers Cloud inventory ledgers. Sync across your devices and your team.">
 <meta name="robots" content="noindex">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self' https://*.supabase.co wss://*.supabase.co; frame-src 'self' about:; base-uri 'none'; form-action 'none'; object-src 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://challenges.cloudflare.com; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self' https://*.supabase.co wss://*.supabase.co; frame-src 'self' about: https://challenges.cloudflare.com; base-uri 'none'; form-action 'none'; object-src 'none'">
 <meta name="referrer" content="strict-origin-when-cross-origin">
 <link rel="icon" type="image/png" sizes="32x32" href="icon-32.png">
 <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
@@ -48,6 +48,7 @@ button.danger{background:var(--bad)}details{margin-top:10px}summary{cursor:point
       <div id="pwrow"><label for="pw" id="pwlabel">Password</label>
       <input id="pw" type="password" autocomplete="current-password" minlength="10" required></div>
       <label class="check" id="agreerow" for="agreebox" hidden><input id="agreebox" type="checkbox"><span>I am 18 or older and I agree to the <a href="terms.html" target="_blank" rel="noopener">Terms</a> and <a href="privacy.html" target="_blank" rel="noopener">Privacy Policy</a>.</span></label>
+      <div id="cfrow"></div>
       <button id="go" type="submit">Sign in</button>
     </form>
     <button class="link" id="toggle" type="button">Create an account</button>
@@ -100,6 +101,7 @@ button.danger{background:var(--bad)}details{margin-top:10px}summary{cursor:point
   <iframe id="frame" title="Ledger" allow="clipboard-write"></iframe>
 </section>
 
+<script src="https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit" async defer></script>
 <script src="supabase.min.js"></script>
 <script src="adapter.js"></script>
 <script src="config.js"></script>
