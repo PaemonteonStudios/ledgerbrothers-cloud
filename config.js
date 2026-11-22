@@ -3,5 +3,6 @@ window.LB_CONFIG = {
   SUPABASE_URL: "https://tqxsipwrcckkkauatnyp.supabase.co",
   SUPABASE_ANON_KEY: "sb_publishable_1Csn9_eYmhRfXOkHc9iYIQ_Ezc6GJ1K",
   STORE_URL: "https://ledgerbrothers.gumroad.com/l/cloud",
+  TURNSTILE_SITE_KEY: "0x4AAAAAAGNvyo40cS7bS8h_",
   SUPPORT: "support@ledgerbrothers.com"
 };
