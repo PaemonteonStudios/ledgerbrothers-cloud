@@ -21,14 +21,26 @@
     $("#agreerow").hidden = m !== "up";
     $("#toggle").textContent = m === "up" ? "I have an account" : "Create an account";
     $("#pwrow").hidden = m === "reset";
+    $("#cfrow").hidden = m === "newpw";
+    cfInit();
     $("#pwlabel").textContent = m === "newpw" ? "New password (10+ characters)" : "Password";
     $("#pw").autocomplete = m === "up" ? "new-password" : "current-password";
     say("");
   }
+  // Cloudflare Turnstile: shown for sign in, create account and reset. Tokens are single use, so reset after every try.
+  var cfId = null;
+  function cfToken() { try { return cfId !== null && window.turnstile ? (window.turnstile.getResponse(cfId) || "") : ""; } catch (e) { return ""; } }
+  function cfReset() { try { if (cfId !== null && window.turnstile) window.turnstile.reset(cfId); } catch (e) {} }
+  function cfInit() {
+    if (cfId !== null || !C.TURNSTILE_SITE_KEY || !window.turnstile) return;
+    try { cfId = window.turnstile.render("#cfrow", { sitekey: C.TURNSTILE_SITE_KEY, theme: "auto" }); } catch (e) { cfId = null; }
+  }
+  window.addEventListener("load", cfInit);
   function friendly(e) {
     var m = (e && e.message) || "";
     if (/invalid login/i.test(m)) return "That email and password don't match.";
     if (/already registered/i.test(m)) return "That email already has an account. Try signing in.";
+    if (/captcha/i.test(m)) return "Please complete the security check below and try again.";
     if (/rate|too many/i.test(m)) return "Too many tries. Please wait a minute and try again.";
     if (/password/i.test(m)) return m;
     return "Something went wrong. Please try again.";
@@ -52,20 +64,20 @@
     try {
       var redirect = location.origin + location.pathname;
       if (mode === "reset") {
-        await sb.auth.resetPasswordForEmail(email, { redirectTo: redirect });
+        await sb.auth.resetPasswordForEmail(email, { redirectTo: redirect, captchaToken: cfToken() || undefined });
         say("If that email has an account, a reset link is on its way.", "ok");
       } else if (mode === "up") {
         if (pw.length < 10) return say("Use at least 10 characters.", "bad");
         if (!$("#agreebox").checked) return say("Please tick the box to agree to the Terms and Privacy Policy.", "bad");
-        var r = await sb.auth.signUp({ email: email, password: pw, options: { emailRedirectTo: redirect, data: { terms_version: TERMS_VERSION, terms_accepted_at: new Date().toISOString() } } });
+        var r = await sb.auth.signUp({ email: email, password: pw, options: { emailRedirectTo: redirect, captchaToken: cfToken() || undefined, data: { terms_version: TERMS_VERSION, terms_accepted_at: new Date().toISOString() } } });
         if (r.error) throw r.error;
         say("Check your email to confirm your account, then sign in.", "ok");
       } else {
-        var s = await sb.auth.signInWithPassword({ email: email, password: pw });
+        var s = await sb.auth.signInWithPassword({ email: email, password: pw, options: { captchaToken: cfToken() || undefined } });
         if (s.error) throw s.error;
       }
     } catch (e) { say(friendly(e), "bad"); }
-    finally { $("#go").disabled = false; }
+    finally { $("#go").disabled = false; cfReset(); }
   };
 
   async function signOut() {
