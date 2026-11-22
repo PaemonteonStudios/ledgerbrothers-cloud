@@ -10,7 +10,7 @@
     auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true, flowType: "pkce" }
   });
   var mode = "in", session = null, adapter = null, ent = null, recovering = false, flash = "";
-  var TERMS_VERSION = "2026-11-05";
+  var TERMS_VERSION = "2026-11-22";
 
   function say(t, cls) { var m = $("#msg"); m.textContent = t || ""; m.className = cls || ""; }
   function show(id) { ["#auth", "#home", "#run"].forEach(function (s) { $(s).hidden = s !== id; }); }
@@ -115,8 +115,15 @@
     }
     sb.rpc("admin_mfa_state").then(function (r) { $("#adminlink").hidden = !(r.data && r.data.is_admin_row === true); }, function () {});
     acct("");
-    var r = await sb.from("entitlements").select("edition,active,expires_at").maybeSingle();
+    var r = await sb.from("entitlements").select("edition,active,expires_at,source").maybeSingle();
     ent = r.data && r.data.active && (!r.data.expires_at || new Date(r.data.expires_at) > new Date()) ? r.data : null;
+    var hadTrial = !!(r.data && r.data.source === "trial");
+    $("#trialbox").hidden = !!r.data;           // anyone who has had access (trial or paid) can't start a trial
+    $("#trialended").hidden = !(hadTrial && !ent);
+    if (ent && ent.source === "trial") {
+      var left = Math.max(1, Math.ceil((new Date(ent.expires_at) - new Date()) / 86400000));
+      $("#who").textContent = session.user.email + " · free trial, " + left + (left === 1 ? " day" : " days") + " left";
+    }
     var list = $("#list"); list.textContent = "";
     $("#locked").hidden = !!ent; list.hidden = !ent;
     $("#sup").textContent = C.SUPPORT; $("#sup").href = "mailto:" + C.SUPPORT; $("#sup2").href = "mailto:" + C.SUPPORT;
@@ -130,6 +137,15 @@
       list.appendChild(b);
     });
   }
+
+  $("#trialgo").onclick = async function () {
+    var b = $("#trialgo"), m = $("#trialmsg"); b.disabled = true; m.textContent = "";
+    try {
+      var r = await sb.rpc("start_trial");
+      if (r.error) { m.textContent = /already used/i.test(r.error.message) ? "A free trial was already used for this email. You can subscribe below." : /confirm/i.test(r.error.message) ? "Please confirm your email first, then try again." : "Couldn't start the trial. Please try again or email us."; b.disabled = false; return; }
+      b.disabled = false; home();
+    } catch (e) { m.textContent = "Couldn't start the trial. Please check your connection and try again."; b.disabled = false; }
+  };
 
   async function open(file, slug, name) {
     var dl = await sb.storage.from("ledgers").download(file + (ent.edition === "pro" ? "-pro" : "") + ".html");
